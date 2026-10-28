@@ -86,12 +86,17 @@ jobs:
       - name: Tests (the API, every macro and constant mapping against the header, header mixing, determinism)
         run: mcpp test
 
+      # Optimized, where a compiler contracts a*b+c into an FMA if allowed to,
+      # and with NDEBUG (b2InternalAssert is not declared).
+      - name: Tests, release profile
+        run: mcpp test --profile release
+
       - name: Export audit (the generated sources are fresh; every declaration and macro of the public headers)
         run: python3 tools/check_exports.py
 
       # The line this row is compared with every other row by: the same sleep
       # step and hashes on every platform, compiler and worker count.
-      - name: Determinism (examples/box2d, every worker count and SIMD path, against the pinned hashes)
+      - name: Determinism (examples/box2d, dev and release, every worker count and SIMD path, against the pinned hashes)
         run: python3 tools/run_determinism.py --toolchain "${{ matrix.toolchain }}"
 
   # The Web: wasm32-emscripten (emsdk from xlings, through mcpp), the tests and
@@ -132,6 +137,9 @@ jobs:
 
       - name: Tests under node
         run: mcpp test --target wasm32-emscripten
+
+      - name: Tests under node, release profile
+        run: mcpp test --target wasm32-emscripten --profile release
 
       - name: Determinism under node (against the pinned hashes)
         run: python3 tools/run_determinism.py --target wasm32-emscripten

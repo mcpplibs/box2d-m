@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Box2D's determinism on this machine, through examples/box2d.
 
-Builds examples/box2d (box2d-determinism, written against the module), runs
-both scenes under every configuration tests/determinism_test.cpp runs — 1, 2,
+Builds examples/box2d (box2d-determinism, written against the module) in the
+dev profile (-O0) and the release profile (optimized: where a compiler would
+contract a*b+c into an FMA, it does so only when optimizing), runs both
+scenes in each under every configuration tests/determinism_test.cpp runs — 1, 2,
 4 and 8 workers of the built-in scheduler, 4 workers of a user task system,
 the SSE2 fallback with 1 and 4 workers — and requires every run of a scene to
 give the same sleep step and hashes, and those to be the values the test
-pins (upstream's for the falling hinges). It prints one line per scene, the
-line CI rows are compared by.
+pins (upstream's for the falling hinges). It prints one line per profile and
+scene, the line CI rows are compared by.
 
   python3 tools/run_determinism.py [--toolchain NAME@VERSION] [--target TRIPLE]
 """
@@ -42,37 +44,39 @@ def main():
     root = Path(__file__).resolve().parents[1]
     example = root / 'examples/box2d'
     select = (['--toolchain', args.toolchain] if args.toolchain else []) + (['--target', args.target] if args.target else [])
-    subprocess.run([args.mcpp, 'build', *select], cwd=example, check=True)
-    runs: dict[str, list[dict]] = {}
-    for config in CONFIGS:
-        out = subprocess.run([args.mcpp, 'run', *select, '--', '--json', *config], cwd=example, check=True,
-                             capture_output=True, text=True).stdout
-        for line in out.splitlines():
-            if line.startswith('{'):
-                run = json.loads(line)
-                runs.setdefault(run['scene'], []).append(run)
     expected = pins(root)
     failed = False
     host = f'{platform.system()} {platform.machine()}' + (f' {args.target}' if args.target else '')
-    for scene, results in runs.items():
-        keys = ('steps', 'sleepStep', 'transforms', 'events', 'state')
-        distinct = {tuple(r[k] for k in keys) for r in results}
-        first = results[0]
-        print(f'Box2D determinism, {host}{", " + args.toolchain if args.toolchain else ""}: {scene}: '
-              f'sleepStep={first["sleepStep"]} transforms={first["transforms"]} events={first["events"]} '
-              f'state={first["state"]} — {len(results)} runs, {"identical" if len(distinct) == 1 else "DIFFERENT"}, '
-              f'AVX2 {"available" if first["avx2"] else "not available"}', flush=True)
-        if len(distinct) != 1:
-            failed = True
-            for r in results:
-                print('   ', json.dumps(r))
-        for key, want in expected[scene].items():
-            got = first[key] if isinstance(first[key], int) else int(first[key], 16)
-            if got != want:
+    for profile in ('dev', 'release'):
+        chosen = [*select, '--profile', profile]
+        subprocess.run([args.mcpp, 'build', *chosen], cwd=example, check=True)
+        runs: dict[str, list[dict]] = {}
+        for config in CONFIGS:
+            out = subprocess.run([args.mcpp, 'run', *chosen, '--', '--json', *config], cwd=example, check=True,
+                                 capture_output=True, text=True).stdout
+            for line in out.splitlines():
+                if line.startswith('{'):
+                    run = json.loads(line)
+                    runs.setdefault(run['scene'], []).append(run)
+        for scene, results in runs.items():
+            keys = ('steps', 'sleepStep', 'transforms', 'events', 'state')
+            distinct = {tuple(r[k] for k in keys) for r in results}
+            first = results[0]
+            print(f'Box2D determinism, {host}{", " + args.toolchain if args.toolchain else ""}, {profile}: {scene}: '
+                  f'sleepStep={first["sleepStep"]} transforms={first["transforms"]} events={first["events"]} '
+                  f'state={first["state"]} - {len(results)} runs, {"identical" if len(distinct) == 1 else "DIFFERENT"}, '
+                  f'AVX2 {"available" if first["avx2"] else "not available"}', flush=True)
+            if len(distinct) != 1:
                 failed = True
-                print(f'    {scene} {key}: 0x{got:X} != pinned 0x{want:X}')
-    if set(runs) != set(expected):
-        sys.exit(f'scenes {sorted(runs)} != {sorted(expected)}')
+                for r in results:
+                    print('   ', json.dumps(r))
+            for key, want in expected[scene].items():
+                got = first[key] if isinstance(first[key], int) else int(first[key], 16)
+                if got != want:
+                    failed = True
+                    print(f'    {profile} {scene} {key}: 0x{got:X} != pinned 0x{want:X}')
+        if set(runs) != set(expected):
+            sys.exit(f'scenes {sorted(runs)} != {sorted(expected)}')
     if failed:
         sys.exit('Box2D is not deterministic here, or not as pinned')
 
