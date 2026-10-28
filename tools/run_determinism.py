@@ -2,8 +2,8 @@
 """Box2D's determinism on this machine, through examples/box2d.
 
 Builds examples/box2d (box2d-determinism, written against the module) in the
-dev profile (-O0) and the release profile (optimized: where a compiler would
-contract a*b+c into an FMA, it does so only when optimizing), runs both
+dev profile (-O0) and the release profile (optimized: GCC contracts a*b+c
+into an FMA, where it is allowed to, only when optimizing), runs both
 scenes in each under every configuration tests/determinism_test.cpp runs — 1, 2,
 4 and 8 workers of the built-in scheduler, 4 workers of a user task system,
 the SSE2 fallback with 1 and 4 workers — and requires every run of a scene to

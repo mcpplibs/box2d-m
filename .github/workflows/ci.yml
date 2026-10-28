@@ -86,7 +86,7 @@ jobs:
       - name: Tests (the API, every macro and constant mapping against the header, header mixing, determinism)
         run: mcpp test
 
-      # Optimized, where a compiler contracts a*b+c into an FMA if allowed to,
+      # Optimized (GCC contracts a*b+c into an FMA, if allowed to, only then),
       # and with NDEBUG (b2InternalAssert is not declared).
       - name: Tests, release profile
         run: mcpp test --profile release
