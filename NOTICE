@@ -1,0 +1,18 @@
+box2d-m: C++ module wrapper
+Copyright (c) 2026 mcpp-community contributors
+
+The wrapper contributions are licensed under the Apache License, Version 2.0.
+Upstream code, copied interfaces and dependencies retain their original
+licenses and copyright notices. Box2D is distributed under the MIT License:
+
+  Copyright (c) 2022 Erin Catto
+
+Its original README and license are retained in upstream/box2d/. The library
+itself is built by compat.box2d from the same release; this wrapper links it,
+it does not modify it.
+
+The determinism scene of tests/determinism_test.cpp and examples/box2d is
+upstream's "falling hinges" (shared/determinism.c, MIT), rewritten in C++
+against the module.
+
+Provenance and checksums are recorded in upstream/documents.json.

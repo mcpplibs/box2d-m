@@ -1,0 +1,48 @@
+# Module wrapper; upstream API preserved. Policy: mcpp-index/docs/mwrap.md.
+[package]
+namespace   = "mcpplibs.mwrap"
+name        = "box2d"
+version     = "3.2.0"
+description = "Box2D 3.2.0 C++ modules for mcpp (import mcpplibs.mwrap.box2d;): the 2D rigid-body physics engine of box2d.h over compat.box2d, its constants and id macros as constexpr, cross-platform deterministic"
+license     = "Apache-2.0"
+authors     = ["mcpp-community"]
+repo        = "https://github.com/mcpplibs/box2d-m"
+platforms   = ["linux", "macos", "windows"]
+
+[targets.box2d]
+kind = "lib"
+
+[build]
+sources      = ["src/*.cppm"]
+# <mwrap/box2d/macros.hpp>: the macros a C++ entity cannot be.
+include_dirs = ["include"]
+# Box2D's deterministic math (upstream CMakeLists.txt): no contraction of
+# a*b+c into an FMA. The module's inline math (b2MakeRot, b2MulAdd,
+# b2TransformPoint …) is compiled here and in this repository's tests with it,
+# as upstream compiles its library and its tests.
+cxxflags     = ["-ffp-contract=off"]
+
+[dependencies]
+compat.box2d = "3.2.0"
+
+[dev-dependencies]
+compat.gtest = "1.15.2"
+
+[package.metadata.mwrap]
+upstream-version = "3.2.0"
+
+[[runtime.deploy]]
+from = "LICENSE"
+to   = "licenses/box2d"
+
+[[runtime.deploy]]
+from = "NOTICE"
+to   = "licenses/box2d"
+
+[[runtime.deploy]]
+from = "upstream/box2d/README.md"
+to   = "licenses/box2d/upstream/box2d"
+
+[[runtime.deploy]]
+from = "upstream/box2d/LICENSE"
+to   = "licenses/box2d/upstream/box2d"
