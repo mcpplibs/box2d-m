@@ -1,0 +1,17 @@
+[package]
+name        = "box2d"
+version     = "0.1.0"
+description = "box2d-determinism, written against import mcpplibs.mwrap.box2d: runs Box2D's determinism scenes (upstream's falling hinges, a struck 20-row pyramid) under a chosen worker count and SIMD path and reports the sleep step and the hashes of the final state, to compare one machine, compiler or thread count with another"
+license     = "Apache-2.0"
+
+[targets.box2d-determinism]
+kind = "bin"
+main = "src/main.cpp"
+
+[build]
+# The falling-hinges setup does float arithmetic of its own: compiled as
+# upstream compiles its tests, without FMA contraction.
+cxxflags = ["-ffp-contract=off"]
+
+[dependencies]
+"mcpplibs.mwrap.box2d" = { path = "../.." }
