@@ -1,0 +1,18 @@
+{
+  "upstream": "https://github.com/erincatto/box2d/archive/refs/tags/v3.2.0.tar.gz",
+  "upstream_version": "3.2.0",
+  "upstream_sha256": "ffec747b27a2267016f8d0240d658c82d187fb2271fa0f69fcbe53fbc067180d",
+  "pruning": "Nothing of Box2D is vendored: the library is compat.box2d 3.2.0, built from the same tag archive (every src/*.c, -ffp-contract=off, upstream's default SIMD selection). Its README and MIT license are retained here.",
+  "documents": [
+    {
+      "path": "upstream/box2d/README.md",
+      "source": "https://github.com/erincatto/box2d/blob/v3.2.0/README.md",
+      "sha256": "49bee2e2c091343e0fcaba9dbff3d243c8496fc4d7f8f25849a7f499ca41011a"
+    },
+    {
+      "path": "upstream/box2d/LICENSE",
+      "source": "https://github.com/erincatto/box2d/blob/v3.2.0/LICENSE",
+      "sha256": "68a3e676d7e94093b102d5cba0d4e04af812040d6f230c3db67a6664574e43d2"
+    }
+  ]
+}
