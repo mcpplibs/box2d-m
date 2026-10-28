@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     ballDef.position = b2Vec2{-12.0f, 6.0f};
     ballDef.linearVelocity = b2Vec2{16.0f, 2.0f};
     b2BodyId ball = b2CreateBody(world, &ballDef);
-    b2Circle circle = {{0.0f, 0.0f}, 0.5f};
+    b2Circle circle = {b2Vec2{0.0f, 0.0f}, 0.5f};
     b2ShapeDef ballShape = b2DefaultShapeDef();
     ballShape.density = 10.0f;
     b2CreateCircleShape(ball, &ballShape, &circle);
