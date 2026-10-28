@@ -1,0 +1,4 @@
+[template]
+description  = "2D physics with import mcpplibs.mwrap.box2d: a tower of boxes struck by a ball on a fixed 60 Hz step, printed as it falls, and its final-state hash — the same bits on every platform Box2D supports"
+default      = true
+post_message = "Run `mcpp run`, or `mcpp run -- <seconds>` to simulate longer."

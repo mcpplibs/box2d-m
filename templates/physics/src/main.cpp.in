@@ -1,0 +1,80 @@
+// {{project.name}} — 2D physics through import mcpplibs.mwrap.box2d: a tower
+// of ten boxes on the ground is struck by a heavy ball, on a fixed 60 Hz step
+// (4 sub-steps). Every half second it prints where the boxes are; at the end,
+// the step on which everything fell asleep and the hash of every body's
+// transform. Box2D is cross-platform deterministic: the hash is the same on
+// Linux, macOS and Windows, x86_64 and arm64, with any worker count.
+//
+//   {{project.name}} [seconds]        simulate this long (default 4)
+import std;
+import mcpplibs.mwrap.box2d;
+
+namespace m = mcpplibs::mwrap::box2d::macros;  // B2_HASH_INIT, B2_IS_NULL …
+
+int main(int argc, char** argv) {
+    int seconds = 4;
+    if (argc > 1 && std::from_chars(argv[1], argv[1] + std::strlen(argv[1]), seconds).ec != std::errc{}) {
+        std::println("usage: {{project.name}} [seconds]");
+        return 2;
+    }
+
+    b2WorldDef worldDef = b2DefaultWorldDef();  // gravity (0, -10)
+    b2WorldId world = b2CreateWorld(&worldDef);
+
+    // The ground: a static box whose top is y = 0.
+    b2BodyDef groundDef = b2DefaultBodyDef();
+    groundDef.position = b2Vec2{0.0f, -1.0f};
+    b2BodyId ground = b2CreateBody(world, &groundDef);
+    b2Polygon groundBox = b2MakeBox(40.0f, 1.0f);
+    b2ShapeDef groundShape = b2DefaultShapeDef();
+    b2CreatePolygonShape(ground, &groundShape, &groundBox);
+
+    // A tower of ten 1 m boxes, and a ball thrown at it from the left.
+    std::vector<b2BodyId> bodies;
+    b2Polygon box = b2MakeBox(0.5f, 0.5f);
+    b2ShapeDef boxShape = b2DefaultShapeDef();
+    for (int i = 0; i < 10; ++i) {
+        b2BodyDef def = b2DefaultBodyDef();
+        def.type = b2_dynamicBody;
+        def.position = b2Vec2{0.0f, 0.5f + static_cast<float>(i)};
+        bodies.push_back(b2CreateBody(world, &def));
+        b2CreatePolygonShape(bodies.back(), &boxShape, &box);
+    }
+    b2BodyDef ballDef = b2DefaultBodyDef();
+    ballDef.type = b2_dynamicBody;
+    ballDef.position = b2Vec2{-12.0f, 6.0f};
+    ballDef.linearVelocity = b2Vec2{16.0f, 2.0f};
+    b2BodyId ball = b2CreateBody(world, &ballDef);
+    b2Circle circle = {{0.0f, 0.0f}, 0.5f};
+    b2ShapeDef ballShape = b2DefaultShapeDef();
+    ballShape.density = 10.0f;
+    b2CreateCircleShape(ball, &ballShape, &circle);
+    bodies.push_back(ball);
+
+    const int steps = seconds * 60;
+    int sleepStep = -1;
+    for (int step = 1; step <= steps; ++step) {
+        b2World_Step(world, 1.0f / 60.0f, 4);
+        if (sleepStep < 0 && b2World_GetAwakeBodyCount(world) == 0) sleepStep = step;
+        if (step % 30 == 0) {
+            std::print("t={:4.1f}s", step / 60.0f);
+            for (std::size_t i = 0; i + 1 < bodies.size(); i += 3) {
+                b2Vec2 p = b2Body_GetPosition(bodies[i]);
+                std::print("  box{}=({:6.2f},{:5.2f})", i, p.x, p.y);
+            }
+            std::println("");
+        }
+    }
+
+    std::uint32_t hash = m::B2_HASH_INIT;
+    for (b2BodyId body : bodies) {
+        b2Transform t = b2Body_GetTransform(body);
+        hash = b2Hash(hash, reinterpret_cast<const std::uint8_t*>(&t), static_cast<int>(sizeof t));
+    }
+    if (sleepStep < 0)
+        std::println("still moving after {} s; transform hash 0x{:08X}", seconds, hash);
+    else
+        std::println("asleep at step {}; transform hash 0x{:08X}", sleepStep, hash);
+    b2DestroyWorld(world);
+    return 0;
+}
