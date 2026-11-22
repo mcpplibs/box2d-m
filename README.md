@@ -31,7 +31,7 @@ Windows and wasm32, with 1 to 8 workers and either SIMD width.
 ## Getting started
 
 ```sh
-mcpp new tower --template mcpplibs.mwrap.box2d@3.2.0
+mcpp new tower --template mcpplibs.mwrap.box2d@3.2.0.1
 cd tower
 mcpp run
 ```
@@ -42,7 +42,7 @@ final state: the same on every platform.
 
 ```toml
 [dependencies]
-"mcpplibs.mwrap.box2d" = "3.2.0"
+mcpplibs.mwrap.box2d = "3.2.0.1"
 ```
 
 ```cpp

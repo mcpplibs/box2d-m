@@ -29,7 +29,7 @@ worker、两种 SIMD 宽度，得到逐位相同的结果。
 ## 快速开始
 
 ```sh
-mcpp new tower --template mcpplibs.mwrap.box2d@3.2.0
+mcpp new tower --template mcpplibs.mwrap.box2d@3.2.0.1
 cd tower
 mcpp run
 ```
@@ -39,7 +39,7 @@ mcpp run
 
 ```toml
 [dependencies]
-"mcpplibs.mwrap.box2d" = "3.2.0"
+mcpplibs.mwrap.box2d = "3.2.0.1"
 ```
 
 ```cpp
