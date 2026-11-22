@@ -14,4 +14,4 @@ main = "src/main.cpp"
 cxxflags = ["-ffp-contract=off"]
 
 [dependencies]
-"mcpplibs.mwrap.box2d" = { path = "../.." }
+mcpplibs.mwrap.box2d = { path = "../.." }

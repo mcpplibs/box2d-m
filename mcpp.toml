@@ -2,7 +2,7 @@
 [package]
 namespace   = "mcpplibs.mwrap"
 name        = "box2d"
-version     = "3.2.0"
+version     = "3.2.0.1"
 description = "Box2D 3.2.0 C++ modules for mcpp (import mcpplibs.mwrap.box2d;): the 2D rigid-body physics engine of box2d.h over compat.box2d, its constants and id macros as constexpr, cross-platform deterministic"
 license     = "Apache-2.0"
 authors     = ["mcpp-community"]
